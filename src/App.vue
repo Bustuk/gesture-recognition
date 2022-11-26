@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Ref } from 'vue'
-import Hands from './components/Hands.vue';
+import Gestures from './components/Gestures.vue';
 
-const handsRef: Ref<null | typeof Hands> = ref(null);
+const gestures: Ref<null | typeof Gestures> = ref(null);
 
 function startCamera() {
-  handsRef.value?.startCamera();
+  gestures.value?.startCamera();
 }
 function stopCamera() {
-  handsRef.value?.stopCamera();
+  gestures.value?.stopCamera();
 }
 
 </script>
@@ -17,7 +17,7 @@ function stopCamera() {
 <template>
     <button @click="startCamera">start KAMERA</button>
     <button @click="stopCamera">stop KAMERA</button>
-    <Hands ref="handsRef" />
+    <Gestures ref="gestures" />
 </template>
 
 <style scoped>

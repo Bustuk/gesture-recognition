@@ -6,22 +6,23 @@ import { Camera, CameraOptions } from '@mediapipe/camera_utils'
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils'
 import throttle from 'lodash.throttle';
 
-const emit = defineEmits(['landmarks', 'gesture']);
+const emit = defineEmits(['landmarks']);
 
 interface Props {
   throttleLandmarks?: number,
   throttleGesture?: number,
-  cameraOptions?: Omit<CameraOptions, 'onFrame'>
+  canvasWidth?: number,
+  canvasHeight?: number,
+  cameraOptions?: Omit<CameraOptions, 'onFrame'>,
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  throttleLandmarks: 100,
-  throttleGesture: 100,
+  throttleLandmarks: 2000,
   canvasVisible: true,
   canvasWidth: 720,
   canvasHeight: 720,
   cameraOptions: () => ({
-    facingMode: 'environment',
+    facingMode: 'user',
     width: 720,
     height: 720,
   }),
@@ -37,11 +38,10 @@ onMounted(() => {
       function onResults(results) {
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, canvas.value?.width || 720, canvas.value?.height || 720);
-      
-        if (results.multiHandLandmarks) {
+        if (results.multiHandLandmarks && results.multiHandedness) {
             for (const landmarks of results.multiHandLandmarks) {
             throttled_log(results);
-          
+            emit('landmarks', results);
             drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
                             {color: '#00FF00', lineWidth: 1});
             drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 1});
@@ -57,7 +57,8 @@ onMounted(() => {
         maxNumHands: 2,
         modelComplexity: 1,
         minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
+        minTrackingConfidence: 0.5,
+        selfieMode: true,
       });
       hands.onResults(onResults);
 
@@ -72,7 +73,6 @@ onMounted(() => {
       }
     }
 });
-
 
 function stopCamera()  {
     console.log('STOP')
@@ -105,6 +105,9 @@ defineExpose({
 
 .input_video {
   position: absolute;
+  width: 720px;
+  height: 720px;
+  transform: scale(-1, 1);
 }
 .output_canvas {
   position: absolute;
