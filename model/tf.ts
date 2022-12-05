@@ -3,13 +3,6 @@ import { SingleHandLandmarks } from '../src/types';
 import * as tf from '@tensorflow/tfjs';
 import flatten from 'lodash/flatten';
 type label = 'pause' | 'flat' | 'victory'
-type myData = Record<label, SingleHandLandmarks[]>;
-
-
-const csv = require('csv-parser');
-const fs = require('fs');
-const csvData = []
-const csvDataLabels = []
 
 const myData = data as myData;
 

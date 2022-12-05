@@ -1,122 +1,27 @@
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 import { SingleHandLandmarks, predictionResult } from '../types';
-import * as tf from '@tensorflow/tfjs';
-import type { Tensor2D } from '@tensorflow/tfjs';
-import * as tfvis from '@tensorflow/tfjs-vis';
+import { tensor2d, loadLayersModel } from '@tensorflow/tfjs';
+import type { LayersModel, Tensor2D } from '@tensorflow/tfjs';
 
-export default async function useGestureRecognition() {
+export default async function useGestureRecognition(modelPath: string) {
   const gesture: Ref<string> = ref('');
+  const tfModel: Ref<LayersModel | null> = ref(null);
   const data: Ref<Tensor2D[]> = ref([]);
 
-  const predict = (singleHand: SingleHandLandmarks): predictionResult => {
-    const model = tf.sequential();
-    const predictions = model.predict(tf.tensor2d(singleHand.tensoredLandmarks, [21, 3]));
+  const predict = async (singleHand: SingleHandLandmarks): Promise<predictionResult> => {
+    const model = await getModel();
+    const predictions = model.predict(tensor2d(singleHand.tensoredLandmarks, [21, 3]));
     const gestureName = predictions[0].className;
     gesture.value = gestureName;
     return gestureName;
   };
 
-  const add = (singleHand: SingleHandLandmarks) => {
-    const tensor = tf.tensor2d(singleHand.tensoredLandmarks, [21, 3]);
-    data.value.push(tensor);
-  };
-
-  const createModel = () => {
-    const model = tf.sequential();
-    
-    const LANDMARK_NUMBER = 21;
-    const COORDINATES = 3;
-    const IMAGE_CHANNELS = 1;  
-    
-    // In the first layer of our convolutional neural network we have 
-    // to specify the input shape. Then we specify some parameters for 
-    // the convolution operation that takes place in this layer.
-    model.add(tf.layers.conv2d({
-      inputShape: [LANDMARK_NUMBER, COORDINATES, IMAGE_CHANNELS],
-      kernelSize: 5,
-      filters: 8,
-      strides: 1,
-      activation: 'relu',
-      kernelInitializer: 'varianceScaling'
-    }));
-  
-    // The MaxPooling layer acts as a sort of downsampling using max values
-    // in a region instead of averaging.  
-    model.add(tf.layers.maxPooling2d({poolSize: [2, 2], strides: [2, 2]}));
-    
-    // Repeat another conv2d + maxPooling stack. 
-    // Note that we have more filters in the convolution.
-    model.add(tf.layers.conv2d({
-      kernelSize: 5,
-      filters: 16,
-      strides: 1,
-      activation: 'relu',
-      kernelInitializer: 'varianceScaling'
-    }));
-    model.add(tf.layers.maxPooling2d({poolSize: [2, 2], strides: [2, 2]}));
-    
-    // Now we flatten the output from the 2D filters into a 1D vector to prepare
-    // it for input into our last layer. This is common practice when feeding
-    // higher dimensional data to a final classification output layer.
-    model.add(tf.layers.flatten());
-  
-    // Our last layer is a dense layer which has 10 output units, one for each
-    // output class (i.e. 0, 1, 2, 3, 4, 5, 6, 7, 8, 9).
-    const NUM_OUTPUT_CLASSES = 10;
-    model.add(tf.layers.dense({
-      units: NUM_OUTPUT_CLASSES,
-      kernelInitializer: 'varianceScaling',
-      activation: 'softmax'
-    }));
-  
-    
-    // Choose an optimizer, loss function and accuracy metric,
-    // then compile and return the model
-    const optimizer = tf.train.adam();
-    model.compile({
-      optimizer: optimizer,
-      loss: 'categoricalCrossentropy',
-      metrics: ['accuracy'],
-    });
-  
-    return model;
-  }
-
-  async function train(model, data) {
-    const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
-    const container = {
-      name: 'Model Training', tab: 'Model', styles: { height: '1000px' }
-    };
-    const fitCallbacks = tfvis.show.fitCallbacks(container, metrics);
-    
-    const BATCH_SIZE = 512;
-    const TRAIN_DATA_SIZE = 5500;
-    const TEST_DATA_SIZE = 1000;
-  
-    const [trainXs, trainYs] = tf.tidy(() => {
-      const d = data.nextTrainBatch(TRAIN_DATA_SIZE);
-      return [
-        d.xs.reshape([TRAIN_DATA_SIZE, 28, 28, 1]),
-        d.labels
-      ];
-    });
-  
-    const [testXs, testYs] = tf.tidy(() => {
-      const d = data.nextTestBatch(TEST_DATA_SIZE);
-      return [
-        d.xs.reshape([TEST_DATA_SIZE, 28, 28, 1]),
-        d.labels
-      ];
-    });
-  
-    return model.fit(trainXs, trainYs, {
-      batchSize: BATCH_SIZE,
-      validationData: [testXs, testYs],
-      epochs: 10,
-      shuffle: true,
-      callbacks: fitCallbacks
-    });
+  const getModel = async () => {
+    if (!tfModel.value) {
+      tfModel.value = await loadLayersModel(modelPath);
+    }
+    return tfModel.value;
   }
 
   return { predict, gesture };
