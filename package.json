@@ -2,7 +2,6 @@
   "name": "my-vue-app",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -15,7 +14,9 @@
     "@mediapipe/hands": "^0.4.1646424915",
     "@tensorflow/tfjs": "^4.1.0",
     "@tensorflow/tfjs-tflite": "0.0.1-alpha.9",
-    "lodash.throttle": "^4.1.1",
+    "@tensorflow/tfjs-vis": "^1.5.1",
+    "csv-parser": "^3.0.0",
+    "lodash": "^4.17.21",
     "seedrandom": "^3.0.5",
     "vue": "^3.2.41"
   },

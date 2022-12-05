@@ -2,15 +2,17 @@
 import { onMounted, ref } from 'vue';
 import type { Ref } from 'vue'
 import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands'
+import type { Results as HandLandmarksResult } from '@mediapipe/hands';
 import { Camera, CameraOptions } from '@mediapipe/camera_utils'
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils'
-import throttle from 'lodash.throttle';
+import throttle from 'lodash/throttle';
 
-const emit = defineEmits(['landmarks']);
+const emit = defineEmits<{
+  (e: 'landmarks', HandLandmarksResult: HandLandmarksResult): void
+}>()
 
 interface Props {
   throttleLandmarks?: number,
-  throttleGesture?: number,
   canvasWidth?: number,
   canvasHeight?: number,
   cameraOptions?: Omit<CameraOptions, 'onFrame'>,
@@ -31,17 +33,17 @@ const props = withDefaults(defineProps<Props>(), {
 const video: Ref<null | HTMLVideoElement> = ref(null);
 const canvas: Ref<null | HTMLCanvasElement> = ref(null);
 const camera: Ref<null | Camera> = ref(null);
-const throttled_log = throttle((landmarks) => console.log(landmarks), props.throttleLandmarks);
+const throttled_emit = throttle((landmarks: HandLandmarksResult) => emit('landmarks', landmarks), props.throttleLandmarks);
+
 onMounted(() => {
     if (canvas.value instanceof HTMLCanvasElement) {
       const canvasCtx = canvas.value.getContext('2d') as CanvasRenderingContext2D;
-      function onResults(results) {
+      function onResults(results: HandLandmarksResult) {
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, canvas.value?.width || 720, canvas.value?.height || 720);
         if (results.multiHandLandmarks && results.multiHandedness) {
             for (const landmarks of results.multiHandLandmarks) {
-            throttled_log(results);
-            emit('landmarks', results);
+            throttled_emit(results);
             drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
                             {color: '#00FF00', lineWidth: 1});
             drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 1});
