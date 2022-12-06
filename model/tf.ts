@@ -1,6 +1,6 @@
 import data from './hands.json';
 import { SingleHandLandmarks } from '../src/types';
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-node';
 import flatten from 'lodash/flatten';
 type label = 'pause' | 'flat' | 'victory'
 
@@ -37,15 +37,15 @@ async function initModel(inputTensor, outputTensor) {
     // skip for brevity
 
     await model.fit(inputTensor, outputTensor, {
-        epochs: 300,
+        epochs: 600,
         shuffle: true,
         batchSize: 128,
         callbacks: {
             onEpochEnd: async (epoch, { loss }) => {
                 // any actions on during any epoch of training
-                if (epoch % 100 === 0) {
-                    console.log(`epoch: ${epoch}, loss: ${loss}`)
-                }
+                // if (epoch % 100 === 0) {
+                //     console.log(`epoch: ${epoch}, loss: ${loss}`)
+                // }
                 await tf.nextFrame();
             },
         }
@@ -60,6 +60,7 @@ async function initModel(inputTensor, outputTensor) {
     model.predict(
       tf.reshape(input[1400], [1, 42])
     ).print();
+    model.save('file://../public/model');
 }
 
 function createSimpleModel() { 
