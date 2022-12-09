@@ -15,10 +15,10 @@ export async function useTensorflow(params: { modelSavePath: string, labelMap: R
   const loadData = async (data: TrainData) => {
     Object.keys(data).forEach((label: string, index: number) => {
         data[label].forEach((hand: SingleHandLandmarks) => {
-            const data = flatten(hand.tensoredLandmarks.map((landmark) => landmark.slice(0, 2)))
+            const data = flatten(hand.tensoredLandmarks)
             // console.log(data)
-            X_dataset.push(data);
-            Y_dataset.push(index);
+            X_dataset.value.push(data);
+            Y_dataset.value.push(index);
         });
     });
   };
@@ -53,7 +53,7 @@ export async function useTensorflow(params: { modelSavePath: string, labelMap: R
 
     const inputTensor = tensor2d(X_dataset.value, [X_dataset.value.length, 42]);
     const outputTensor = tensor(Y_dataset.value, [Y_dataset.value.length,]);
-    await model.value.fit(X_dataset.value, Y_dataset.value, {
+    await model.value.fit(inputTensor, outputTensor, {
       epochs: 300,
       shuffle: true,
       batchSize: 128,

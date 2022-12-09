@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import type { Ref } from 'vue'
 import Gestures from './components/Gestures.vue';
 import Training from './components/Training.vue';
-import json from './model/hands.json'
 const gestures: Ref<null | typeof Gestures> = ref(null);
 
 function startCamera() {
