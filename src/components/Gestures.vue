@@ -4,7 +4,7 @@
     <button @click = "stopCapture">Stop</button>
     <button @click = "() => saveTemplateAsFile(`trainingData.json`, data)">Save</button>
     <p style="font-size: 35px">{{predictionResult.className}}</p>
-    <Hands :throttle-landmarks="500" ref="hands" v-on:landmarks="onLandmarks"/>
+    <Hands :throttle-landmarks="100" ref="hands" v-on:landmarks="onLandmarks"/>
 </template>
 
 <script setup lang="ts">
@@ -77,9 +77,12 @@ async function mapResults(result: HandLandmarksResult): Promise<SingleHandLandma
             landmark.y
           ]))
         }
-
-        predictionResult.value = await predict(singleHand)
         hands.push(singleHand);
+        predictionResult.value = await predict(singleHand)
+        if (predictionResult.value.probability > 0.75) {
+          window.parent.postMessage({ message: 'gesture', 'value': predictionResult.value.className }, '*')
+        }
+        
       } else {
         console.warn('Handedness score is too low');
       }
@@ -93,8 +96,18 @@ async function onLandmarks(result: HandLandmarksResult) {
   if (capture.value) {
     hands.forEach(hand => addData(hand));
   }
-  console.log('onLandmarks', hands);
+  // console.log('onLandmarks', hands);
 }
+addEventListener('message', (event) => {
+  console.log('event', event);
+  if (event.data === 'start') {
+    startCamera();
+  } else if (event.data === 'stop') {
+    stopCamera();
+  }
+})
+
+console.log('XXXXX', window)
 
 defineExpose({
   stopCamera,

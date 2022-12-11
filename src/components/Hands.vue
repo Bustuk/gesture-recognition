@@ -19,7 +19,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  throttleLandmarks: 2000,
+  throttleLandmarks: 500,
   canvasVisible: true,
   canvasWidth: 720,
   canvasHeight: 720,

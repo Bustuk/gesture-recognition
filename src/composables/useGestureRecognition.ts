@@ -19,7 +19,7 @@ export default function useGestureRecognition(modelPath: string = 'model/model.j
     const max = Math.max(...arr[0])
     const index = arr[0].indexOf(max)
     const gestureName = labelMap.get(index)
-    console.log('PREDICTION', gestureName, max, arr[0])
+    console.log('PREDICTION', gestureName, max) //, arr[0])
     return {
       className: gestureName,
       probability: max
