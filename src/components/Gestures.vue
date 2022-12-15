@@ -80,7 +80,11 @@ async function mapResults(result: HandLandmarksResult): Promise<SingleHandLandma
         hands.push(singleHand);
         predictionResult.value = await predict(singleHand)
         if (predictionResult.value.probability > 0.75) {
-          window.parent.postMessage({ message: 'gesture', 'value': predictionResult.value.className }, '*')
+          window.parent.postMessage({
+            message: 'gesture',
+            value: predictionResult.value.className,
+            probability: predictionResult.value.probability
+          }, '*')
         }
         
       } else {

@@ -4,7 +4,7 @@ import * as tf from '@tensorflow/tfjs-node';
 import flatten from 'lodash/flatten';
 type label = 'pause' | 'flat' | 'victory'
 
-const myData = data as myData;
+const myData = data;
 
 const labelMap: Record<label, number> = {
     'pause': 0,
