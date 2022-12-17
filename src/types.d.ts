@@ -1,12 +1,12 @@
 import type { NormalizedLandmarkList } from '@mediapipe/hands';
 
-export type SingleHandLandmarks = {
+type SingleHandLandmarks = {
     handedness: 'Left' | 'Right',
     landmarks: NormalizedLandmarkList,
-    tensoredLandmarks: number[][],
+    tensoredLandmarks: number[],
 };
 
-export type predictionResult = {
+type PredictionResult = {
     className: string,
     probability: number
 };

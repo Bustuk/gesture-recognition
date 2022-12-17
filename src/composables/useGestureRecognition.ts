@@ -1,4 +1,4 @@
-import { SingleHandLandmarks, predictionResult } from '../types';
+import type { SingleHandLandmarks, PredictionResult } from '../types';
 import { tensor2d, loadLayersModel } from '@tensorflow/tfjs';
 import type { LayersModel } from '@tensorflow/tfjs';
 
@@ -8,7 +8,7 @@ export default function useGestureRecognition(modelPath: string = 'model/model.j
   labelMap.set(0, 'pause')
   labelMap.set(1, 'flat')
   labelMap.set(2, 'victory')
-  const predict = async (singleHand: SingleHandLandmarks): Promise<predictionResult> => {
+  const predict = async (singleHand: SingleHandLandmarks): Promise<PredictionResult> => {
     // w zależności od tego czy jest lewa czy prawa ręka
     // użyjemy rónych modeli - narazie jest zbudowany tylko ten dla lewej ręki
     // lub wymyślę jak je przemapować 

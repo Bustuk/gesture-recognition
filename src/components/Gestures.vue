@@ -12,17 +12,21 @@ import { ref } from 'vue';
 import type { Ref } from 'vue'
 import Hands from './Hands.vue';
 import type { Results as HandLandmarksResult } from '@mediapipe/hands';
-import { predictionResult, SingleHandLandmarks } from '../types';
 import flatten from 'lodash/flatten';
 import useGestureRecognition from '../composables/useGestureRecognition';
+import type { PredictionResult, SingleHandLandmarks } from '../types';
 const { predict } = useGestureRecognition();
 const hands: Ref<null | typeof Hands> = ref(null);
 const label: Ref<string> = ref('');
-const data: Ref<HandLandmarksResult> = ref({} as HandLandmarksResult);
-const capture: Ref<boolean> = ref(false);
-const predictionResult: Ref<predictionResult> = ref({} as predictionResult);
+type Data = {
+  [key: string]: SingleHandLandmarks[]
+}
+const data: Ref<Data> = ref({} as Data);
 
-const saveTemplateAsFile = (filename = 'trainingData.json', dataObjToWrite) => {
+const capture: Ref<boolean> = ref(false);
+const predictionResult: Ref<PredictionResult> = ref({} as PredictionResult);
+
+const saveTemplateAsFile = (filename = 'trainingData.json', dataObjToWrite: {}) => {
   const blob = new Blob([JSON.stringify(dataObjToWrite)], { type: "text/json" });
   const link = document.createElement("a");
 
@@ -41,6 +45,7 @@ const saveTemplateAsFile = (filename = 'trainingData.json', dataObjToWrite) => {
 };
 
 const addData = (landmarks: SingleHandLandmarks) => {
+  data.value
   if (data.value[label.value]) {
     data.value[label.value].push(landmarks);
   } else {

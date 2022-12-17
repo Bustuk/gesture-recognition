@@ -3,7 +3,8 @@ import { onMounted, ref } from 'vue';
 import type { Ref } from 'vue'
 import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands'
 import type { Results as HandLandmarksResult } from '@mediapipe/hands';
-import { Camera, CameraOptions } from '@mediapipe/camera_utils'
+import { Camera } from '@mediapipe/camera_utils'
+import type { CameraOptions } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils'
 import throttle from 'lodash/throttle';
 
