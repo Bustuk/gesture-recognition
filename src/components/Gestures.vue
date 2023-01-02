@@ -1,10 +1,5 @@
 <template>
-  <input type="text" v-model="label"/>
-    <button @click = "startCapture">Start</button>
-    <button @click = "stopCapture">Stop</button>
-    <button @click = "() => saveTemplateAsFile(`trainingData.json`, data)">Save</button>
-    <p style="font-size: 35px">{{predictionResult.className}}</p>
-    <Hands :throttle-landmarks="100" ref="hands" v-on:landmarks="onLandmarks"/>
+  <Hands :throttle-landmarks="100" ref="hands" v-on:landmarks="onLandmarks"/>    
 </template>
 
 <script setup lang="ts">
@@ -12,46 +7,12 @@ import { ref } from 'vue';
 import type { Ref } from 'vue'
 import Hands from './Hands.vue';
 import type { Results as HandLandmarksResult } from '@mediapipe/hands';
+import type { SingleHandLandmarks } from '../types';
 import flatten from 'lodash/flatten';
-import useGestureRecognition from '../composables/useGestureRecognition';
-import type { PredictionResult, SingleHandLandmarks } from '../types';
-const { predict } = useGestureRecognition();
+import { useEventBus } from '@vueuse/core'
+import { landmarksKey } from '../consts';
+const bus = useEventBus(landmarksKey)
 const hands: Ref<null | typeof Hands> = ref(null);
-const label: Ref<string> = ref('');
-type Data = {
-  [key: string]: SingleHandLandmarks[]
-}
-const data: Ref<Data> = ref({} as Data);
-
-const capture: Ref<boolean> = ref(false);
-const predictionResult: Ref<PredictionResult> = ref({} as PredictionResult);
-
-const saveTemplateAsFile = (filename = 'trainingData.json', dataObjToWrite: {}) => {
-  const blob = new Blob([JSON.stringify(dataObjToWrite)], { type: "text/json" });
-  const link = document.createElement("a");
-
-  link.download = filename;
-  link.href = window.URL.createObjectURL(blob);
-  link.dataset.downloadurl = ["text/json", link.download, link.href].join(":");
-
-  const evt = new MouseEvent("click", {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-  });
-
-  link.dispatchEvent(evt);
-  link.remove()
-};
-
-const addData = (landmarks: SingleHandLandmarks) => {
-  data.value
-  if (data.value[label.value]) {
-    data.value[label.value].push(landmarks);
-  } else {
-    data.value[label.value] = [landmarks];
-  }
-}
 
 function startCamera() {
   hands.value?.startCamera();
@@ -60,15 +21,8 @@ function stopCamera() {
   hands.value?.stopCamera();
 }
 
-function startCapture()  {
-  capture.value = true
-}
-function stopCapture() {
-  capture.value = false;
-}
-
 async function mapResults(result: HandLandmarksResult): Promise<SingleHandLandmarks[]> {
-  const hands: SingleHandLandmarks[] = [];
+  const handLandmarks: SingleHandLandmarks[] = [];
   if (result.multiHandLandmarks && result.multiHandedness) {
     for (let i = 0; i < result.multiHandLandmarks.length; i++) {
       const landmarks = result.multiHandLandmarks[i];
@@ -76,47 +30,38 @@ async function mapResults(result: HandLandmarksResult): Promise<SingleHandLandma
       if (handedness.score > 0.7) { 
         const singleHand = {
           handedness: handedness.label,
-          landmarks,
           tensoredLandmarks: flatten(landmarks.map(landmark => [
             landmark.x, 
             landmark.y
           ]))
         }
-        hands.push(singleHand);
-        predictionResult.value = await predict(singleHand)
-        if (predictionResult.value.probability > 0.75) {
-          window.parent.postMessage({
-            message: 'gesture',
-            value: predictionResult.value.className,
-            probability: predictionResult.value.probability
-          }, '*')
-        }
+        handLandmarks.push(singleHand);
+        // predictionResult.value = await predict(singleHand)
+        // if (predictionResult.value.probability > 0.75) {
+        //   console.log('predictionResult', predictionResult.value)
+        // }
         
       } else {
         console.warn('Handedness score is too low');
       }
     }
   }
-  return hands;
+  return handLandmarks;
 }
 
 async function onLandmarks(result: HandLandmarksResult) {
-  const hands = await mapResults(result);
-  if (capture.value) {
-    hands.forEach(hand => addData(hand));
-  }
-  // console.log('onLandmarks', hands);
+  const landmarks = await mapResults(result);
+  bus.emit({landmarks})
 }
+
 addEventListener('message', (event) => {
-  console.log('event', event);
-  if (event.data === 'start') {
+  // console.log('event', event);
+  if (event.data === 'startCamera') {
     startCamera();
   } else if (event.data === 'stop') {
     stopCamera();
   }
 })
-
-console.log('XXXXX', window)
 
 defineExpose({
   stopCamera,

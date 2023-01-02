@@ -1,44 +1,50 @@
-import { sequential, layers, tensor, tensor2d, reshape, nextFrame } from '@tensorflow/tfjs'
+import * as tf from '@tensorflow/tfjs'
 import type { Sequential } from '@tensorflow/tfjs'
-import { ref } from 'vue'
+import type { LabelledLandmark } from '../types';
+import { useStorage } from '@vueuse/core'
+import flatten from 'lodash/flatten'
 import type { Ref } from 'vue'
-import { SingleHandLandmarks } from '../types';
-import flatten from 'lodash/flatten';
 
-type TrainData = Record<string, SingleHandLandmarks[]>;
+const state: Ref<Record<number, string>> = useStorage('gesture-recognition-model-labels', { })
 
-export async function useTensorflow(params: { modelSavePath: string, labelMap: Record<string, number> }) {
-  const X_dataset: Ref<number[][]> = ref([]);
-  const Y_dataset: Ref<number[]> = ref([]);
-  const model: Ref<Sequential | null> = ref(null);
+export default function useTensorflow(params: { modelSavePath: string} = { modelSavePath: 'indexeddb://gesture-recongition-model' }) {
+  const X_dataset: number[][] = [] //: Ref<> = ref([]);
+  const Y_dataset: number[] = []//: Ref<> = ref([]);
+  let model: null | Sequential = null;
+  const labelMap: Record<string, number> = {}
 
-  const loadData = async (data: TrainData) => {
-    Object.keys(data).forEach((label: string, index: number) => {
-        data[label].forEach((hand: SingleHandLandmarks) => {
-            const data = flatten(hand.tensoredLandmarks)
-            // console.log(data)
-            X_dataset.value.push(data);
-            Y_dataset.value.push(index);
-        });
+  const loadData = async (data: LabelledLandmark[]) => {
+    state.value = {}
+    data.forEach((hand: LabelledLandmark) => {
+      X_dataset.push(hand.tensoredLandmarks);
+      if (labelMap[hand.label] === undefined) {
+        labelMap[hand.label] = Object.keys(labelMap).length;
+      }
+      Y_dataset.push(labelMap[hand.label]);
     });
+    for (const [key, value] of Object.entries(labelMap)) {
+      state.value[value] = key
+    }
+    console.log(labelMap.value)
+    console.log(X_dataset, Y_dataset)
   };
 
   const saveModel = async () => {
-    if (!model.value) {
+    if (!model) {
       throw new Error('Model doesn\'t exist');
     }
-    model.value.save(params.modelSavePath);
+    model.save(params.modelSavePath);
   }
 
   const prepareModel = async () => {
-    model.value = sequential({ name: 'simple-model' });
-    model.value.add(layers.dropout({inputShape: [42, ], rate: 0.2}))
-    model.value.add(layers.dense({ inputShape: [42, ], units: 24, activation: 'relu' }));
-    model.value.add(layers.dropout({ rate: 0.2}))
-    model.value.add(layers.dense({ units: 10, activation: 'relu' }));
-    model.value.add(layers.dense({ units: 3, activation: 'softmax' }));
+    model = tf.sequential({ name: 'simple-model' });
+    model.add(tf.layers.dropout({inputShape: [42, ], rate: 0.2}))
+    model.add(tf.layers.dense({ inputShape: [42, ], units: 24, activation: 'relu' }));
+    model.add(tf.layers.dropout({ rate: 0.2}))
+    model.add(tf.layers.dense({ units: 10, activation: 'relu' }));
+    model.add(tf.layers.dense({ units: Object.keys(state.value).length, activation: 'softmax' }));
 
-    model.value.compile({
+    model.compile({
         optimizer: 'adam',
         loss: 'sparseCategoricalCrossentropy',
         metrics: ['accuracy'],
@@ -46,28 +52,28 @@ export async function useTensorflow(params: { modelSavePath: string, labelMap: R
   }
 
   const train = async () => {
-    if (!model.value) {
+    if (!model) {
       throw new Error('Model doesn\'t exist');
     }
-    model.value.save(params.modelSavePath);
 
-    const inputTensor = tensor2d(X_dataset.value, [X_dataset.value.length, 42]);
-    const outputTensor = tensor(Y_dataset.value, [Y_dataset.value.length,]);
-    await model.value.fit(inputTensor, outputTensor, {
-      epochs: 300,
+    const inputTensor = tf.tensor2d(X_dataset, [X_dataset.length, 42]);
+    const outputTensor = tf.tensor(Y_dataset, [Y_dataset.length,]);
+    await model.fit(inputTensor, outputTensor, {
+      epochs: 800,
       shuffle: true,
       batchSize: 128,
       callbacks: {
-          onEpochEnd: async (epoch, { loss }) => {
+          onEpochEnd: async (epoch, logs) => {
               // any actions on during any epoch of training
-              if (epoch % 100 === 0) {
-                  console.log(`epoch: ${epoch}, loss: ${loss}`)
+              if (epoch % 50 === 0) {
+                  console.log(`useTF epoch: ${epoch}, loss: ${logs?.loss}`)
               }
-              await nextFrame();
+              await tf.nextFrame();
           },
       }
-  })
+    })
+    console.log('useTensorflow MODEL TEACHING FINISHED', model)
   }
 
-  return { loadData, saveModel };
+  return { loadData, saveModel, train, prepareModel };
 }

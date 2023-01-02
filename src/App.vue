@@ -1,27 +1,44 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Ref } from 'vue'
-import Gestures from './components/Gestures.vue';
-import Training from './components/Training.vue';
-const gestures: Ref<null | typeof Gestures> = ref(null);
-
-function startCamera() {
-  gestures.value?.startCamera();
-}
-function stopCamera() {
-  gestures.value?.stopCamera();
-}
-
+import { NMessageProvider } from 'naive-ui';
 </script>
 
 <template>
-    <button @click="startCamera">start KAMERA</button>
-    <button @click="stopCamera">stop KAMERA</button>
-    <!-- <pre>{{json['pause']}}</pre> -->
-    <Gestures ref="gestures" />
-    <!-- <Training /> -->
+  <n-message-provider>
+    <RouterView />
+  </n-message-provider>
 </template>
 
-<style scoped>
+<style>
+/* body {
+  background-color: antiquewhite;
+} */
 
+.n-card {
+  -webkit-box-shadow: 0px 1px 7px 0px rgba(20, 45, 1, 1);
+  -moz-box-shadow: 0px 1px 7px 0px rgba(20, 45, 1, 1);
+  box-shadow: 0px 1px 7px 0px rgba(20, 45, 1, 1);
+}
+
+#app {
+  margin: auto;
+  height: 100vh;
+  width: 70%;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.center {
+  align-items: center;
+  justify-content: center;
+}
 </style>
