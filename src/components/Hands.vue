@@ -26,8 +26,11 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  draw: {
+    type: Boolean,
+    default: false
+  },
   throttleLandmarks: 500,
-  canvasVisible: true,
   canvasWidth: 720,
   canvasHeight: 720,
   cameraOptions: () => ({
@@ -70,17 +73,18 @@ onMounted(() => {
   if (canvas.value instanceof HTMLCanvasElement) {
     const canvasCtx = canvas.value.getContext('2d') as CanvasRenderingContext2D;
     function onResults(results: HandLandmarksResult) {
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, canvas.value?.width || 720, canvas.value?.height || 720);
-      if (results.multiHandLandmarks && results.multiHandedness) {
+      if (props.draw) {
+        canvasCtx.save();
+        canvasCtx.clearRect(0, 0, canvas.value?.width || 720, canvas.value?.height || 720);
           for (const landmarks of results.multiHandLandmarks) {
-          throttled_emit(results);
-          drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
-                          {color: '#00FF00', lineWidth: 1});
-          drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 1});
+            drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
+              {color: '#00FF00', lineWidth: 1});
+            drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 1});
           }
-      }
-      canvasCtx.restore();
+        canvasCtx.restore();
+      };
+      throttled_emit(results);
+      
     }
     hands.onResults(onResults);
   }

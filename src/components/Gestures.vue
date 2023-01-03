@@ -1,5 +1,5 @@
 <template>
-  <Hands :throttle-landmarks="100" ref="hands" v-on:landmarks="onLandmarks"/>    
+  <Hands :draw="props.draw" :throttle-landmarks="props.throttleLandmarks" ref="hands" v-on:landmarks="onLandmarks"/>    
 </template>
 
 <script setup lang="ts">
@@ -13,7 +13,16 @@ import { useEventBus } from '@vueuse/core'
 import { landmarksKey } from '../consts';
 const bus = useEventBus(landmarksKey)
 const hands: Ref<null | typeof Hands> = ref(null);
-
+const props = defineProps({
+  draw: {
+    type: Boolean,
+    default: false
+  },
+  throttleLandmarks: {
+    type: Number,
+    default: 100
+  }
+})
 function startCamera() {
   hands.value?.startCamera();
 }
@@ -36,10 +45,6 @@ async function mapResults(result: HandLandmarksResult): Promise<SingleHandLandma
           ]))
         }
         handLandmarks.push(singleHand);
-        // predictionResult.value = await predict(singleHand)
-        // if (predictionResult.value.probability > 0.75) {
-        //   console.log('predictionResult', predictionResult.value)
-        // }
         
       } else {
         console.warn('Handedness score is too low');
@@ -53,15 +58,6 @@ async function onLandmarks(result: HandLandmarksResult) {
   const landmarks = await mapResults(result);
   bus.emit({landmarks})
 }
-
-addEventListener('message', (event) => {
-  // console.log('event', event);
-  if (event.data === 'startCamera') {
-    startCamera();
-  } else if (event.data === 'stop') {
-    stopCamera();
-  }
-})
 
 defineExpose({
   stopCamera,

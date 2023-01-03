@@ -20,7 +20,6 @@ import useGestureRecognition from '../composables/useGestureRecognition';
 import { landmarksKey } from '../consts';
 import { useEventBus } from '@vueuse/core'
 import type { PredictionResult } from '../types';
-const path = 'model2/model.json'
 const { predict } = useGestureRecognition();
 const prediction: Ref<PredictionResult> = ref({className: '', probability: 0})
 const bus = useEventBus(landmarksKey)

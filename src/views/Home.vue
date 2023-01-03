@@ -2,7 +2,7 @@
   <div class="flex flex-row center h-100">
     <div class="section">
       <n-card style="width:720px; height: 720px;" :bordered="false" content-style="padding: 0;">
-        <Gestures ref="gestures" />
+        <Gestures :draw="true" ref="gestures" />
       </n-card>
       <div class="flex flex-row center" style="margin-top: -50px; z-index: 2;">
         <n-space>
