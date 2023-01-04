@@ -11,7 +11,7 @@ const routes = [
     { path: 'train-model', component: TrainModel },
     { path: 'test-model', component: TestModel },] 
   },
-  { path: '/simple', component: InIframe },
+  { path: '/iframe', component: InIframe },
 ]
 
 export default createRouter({
