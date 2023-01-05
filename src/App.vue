@@ -22,7 +22,7 @@ import { NMessageProvider } from 'naive-ui';
 #app {
   margin: auto;
   height: 100vh;
-  width: 70%;
+  width: 80%;
 }
 
 .flex {

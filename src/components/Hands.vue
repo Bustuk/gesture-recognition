@@ -23,13 +23,11 @@ interface Props {
   canvasWidth?: number,
   canvasHeight?: number,
   cameraOptions?: Omit<CameraOptions, 'onFrame'>,
+  draw: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  draw: {
-    type: Boolean,
-    default: false
-  },
+  draw: false,
   throttleLandmarks: 500,
   canvasWidth: 720,
   canvasHeight: 720,

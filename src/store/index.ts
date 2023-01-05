@@ -18,29 +18,3 @@ export const useCaptureControlStore = defineStore('captureControl', () => {
 
   return { label, capture, startCapture, stopCapture, setLabel }
 })
-
-export const useCameraControlStore = defineStore('cameraControl', () => {
-  const capture: Ref<boolean> = ref(false);
-
-  function startCaptureVideo()  {
-    capture.value = true
-  }
-  function stopCaptureVideo() {
-    capture.value = false;
-  }
-
-  return { capture, stopCaptureVideo, startCaptureVideo }
-})
-
-export const useGestureStore = defineStore('gesture', () => {
-  const capture: Ref<boolean> = ref(false);
-
-  function startCaptureVideo()  {
-    capture.value = true
-  }
-  function stopCaptureVideo() {
-    capture.value = false;
-  }
-
-  return { capture, stopCaptureVideo, startCaptureVideo }
-})
