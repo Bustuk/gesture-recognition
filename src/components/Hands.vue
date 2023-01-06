@@ -19,7 +19,7 @@ const emit = defineEmits<{
 }>()
 
 interface Props {
-  throttleLandmarks?: number,
+  landmarksDelay?: number,
   canvasWidth?: number,
   canvasHeight?: number,
   cameraOptions?: Omit<CameraOptions, 'onFrame'>,
@@ -28,7 +28,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   draw: false,
-  throttleLandmarks: 500,
+  landmarksDelay: 500,
   canvasWidth: 720,
   canvasHeight: 720,
   cameraOptions: () => ({
@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<Props>(), {
 const video: Ref<null | HTMLVideoElement> = ref(null);
 const canvas: Ref<null | HTMLCanvasElement> = ref(null);
 const camera: Ref<null | Camera> = ref(null);
-const throttled_emit = throttle((landmarks: HandLandmarksResult) => emit('landmarks', landmarks), props.throttleLandmarks);
+const throttled_emit = throttle((landmarks: HandLandmarksResult) => emit('landmarks', landmarks), props.landmarksDelay);
 const cameraStarted: Ref<boolean> = ref(false);
 
 const hands = new Hands({locateFile: (file) => {

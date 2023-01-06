@@ -1,5 +1,5 @@
 <template>
-  <Hands :draw="props.draw" :throttle-landmarks="props.throttleLandmarks" ref="hands" v-on:landmarks="onLandmarks"/>    
+  <Hands :draw="props.draw" :landmarks-delay="props.landmarksDelay" ref="hands" v-on:landmarks="onLandmarks"/>    
 </template>
 
 <script setup lang="ts">
@@ -18,7 +18,7 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  throttleLandmarks: {
+  landmarksDelay: {
     type: Number,
     default: 100
   }
