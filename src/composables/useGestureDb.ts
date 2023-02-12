@@ -3,8 +3,6 @@ import type { Table } from 'dexie';
 import type { LabelledLandmark } from '../types';
 
 class GestureDB extends Dexie {
-  // 'friends' is added by dexie when declaring the stores()
-  // We just tell the typing system this is the case
   gestures!: Table<LabelledLandmark>; 
 
   constructor() {

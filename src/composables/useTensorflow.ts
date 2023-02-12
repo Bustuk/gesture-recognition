@@ -2,10 +2,9 @@ import * as tf from '@tensorflow/tfjs'
 import type { Sequential } from '@tensorflow/tfjs'
 import type { LabelledLandmark } from '../types';
 import { useStorage } from '@vueuse/core'
-import flatten from 'lodash/flatten'
 import type { Ref } from 'vue'
 
-const state: Ref<Record<number, string>> = useStorage('gesture-recognition-model-labels', { })
+const state: Ref<Record<number, string>> = useStorage('gesture-recognition-model-labels', {"0":"victory","1":"pause","2":"spiderman","3":"l","4":"flat"})
 
 export default function useTensorflow(params: { modelSavePath: string} = { modelSavePath: 'indexeddb://gesture-recongition-model' }) {
   const X_dataset: number[][] = [] //: Ref<> = ref([]);
@@ -34,6 +33,16 @@ export default function useTensorflow(params: { modelSavePath: string} = { model
       throw new Error('Model doesn\'t exist');
     }
     model.save(params.modelSavePath);
+  }
+
+  const downloadModel = async () => {
+    if (!model) {
+      model = await tf.loadLayersModel(params.modelSavePath) as Sequential;
+      if (!model) {
+        throw new Error('Model doesn\'t exist');
+      }
+    }
+    model.save('downloads://gesture-recongition-model')
   }
 
   const prepareModel = async () => {
@@ -75,5 +84,5 @@ export default function useTensorflow(params: { modelSavePath: string} = { model
     console.log('useTensorflow MODEL TEACHING FINISHED', model)
   }
 
-  return { loadData, saveModel, train, prepareModel };
+  return { loadData, saveModel, train, prepareModel, downloadModel };
 }

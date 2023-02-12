@@ -5,8 +5,8 @@ import { useStorage } from '@vueuse/core'
 import type { Ref } from 'vue'
 export default function useGestureRecognition(modelPath: string = 'indexeddb://gesture-recongition-model') {
   let model: LayersModel | null = null; 
-  const labelMap: Ref<Record<number, string>> = useStorage('gesture-recognition-model-labels', {})
-
+  const labelMap: Ref<Record<number, string>> = useStorage('gesture-recognition-model-labels',
+  {"0":"victory","1":"pause","2":"spiderman","3":"l","4":"flat"})
   const predict = async (singleHand: SingleHandLandmarks): Promise<PredictionResult> => {
     // w zależności od tego czy jest lewa czy prawa ręka
     // użyjemy rónych modeli - narazie jest zbudowany tylko ten dla lewej ręki
@@ -32,7 +32,12 @@ export default function useGestureRecognition(modelPath: string = 'indexeddb://g
 
   const getModel = async (): Promise<LayersModel> => {
     if (!model) {
-      model = await loadLayersModel(modelPath)
+      try {
+        model = await loadLayersModel(modelPath)
+      } catch( err ) {
+        model = await loadLayersModel('model/gesture-recongition-model.json')
+        console.error('Error loading indexedDB model, using default', err)
+       }
     } 
     
     return model
