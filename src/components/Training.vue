@@ -128,7 +128,6 @@ async function train(model, data) {
 
   const [trainXs, trainYs] = tf.tidy(() => {
     const d = data.nextTrainBatch(TRAIN_DATA_SIZE);
-    console.log(d)
     return [
       d.xs.reshape([TRAIN_DATA_SIZE, 28, 28, 1]),
       d.labels

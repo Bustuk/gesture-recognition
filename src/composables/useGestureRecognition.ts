@@ -19,7 +19,7 @@ export default function useGestureRecognition(modelPath: string = 'indexeddb://g
       max = Math.max(...arr[0])
       const index = arr[0].indexOf(max)
       gestureName = labelMap.value[index]
-      console.log('PREDICTION', gestureName, max) //, arr[0])
+      // console.log('PREDICTION', gestureName, max) //, arr[0])
     } catch(err) {
       console.error(err)
     }

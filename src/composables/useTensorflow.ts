@@ -24,8 +24,6 @@ export default function useTensorflow(params: { modelSavePath: string} = { model
     for (const [key, value] of Object.entries(labelMap)) {
       state.value[value] = key
     }
-    console.log(labelMap.value)
-    console.log(X_dataset, Y_dataset)
   };
 
   const saveModel = async () => {
