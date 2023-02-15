@@ -2,7 +2,7 @@ import type { Results as HandLandmarksResult } from '@mediapipe/hands';
 import type { SingleHandLandmarks } from '../types';
 import flatten from 'lodash/flatten';
 
-function mapResults(result: HandLandmarksResult): SingleHandLandmarks[] {
+export function mapResults(result: HandLandmarksResult): SingleHandLandmarks[] {
   const handLandmarks: SingleHandLandmarks[] = [];
   if (result.multiHandLandmarks && result.multiHandedness) {
     for (let i = 0; i < result.multiHandLandmarks.length; i++) {

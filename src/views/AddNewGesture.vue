@@ -11,15 +11,13 @@ import { NButton, NInput, NLayout } from 'naive-ui';
 import { useCaptureControlStore } from '../store';
 import { storeToRefs } from 'pinia'
 import useGestureDB from '../composables/useGestureDb';
-import { landmarksKey } from '../consts';
-import { useEventBus } from '@vueuse/core'
+import eventBus from '../services/EventBus';
 const store = useCaptureControlStore();
 const { label, capture } = storeToRefs(store);
 const { startCapture, stopCapture, setLabel } = store
 const { add } = useGestureDB();
 
-const bus = useEventBus(landmarksKey)
-bus.on(({ landmarks })=> {
+eventBus.on(({ landmarks })=> {
   if (capture.value)
     landmarks.forEach(hand => add({...hand, label: label.value}))
 })

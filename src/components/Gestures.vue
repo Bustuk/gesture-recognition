@@ -7,11 +7,9 @@ import { ref } from 'vue';
 import type { Ref } from 'vue'
 import Hands from './Hands.vue';
 import type { Results as HandLandmarksResult } from '@mediapipe/hands';
-import type { SingleHandLandmarks } from '../types';
-import flatten from 'lodash/flatten';
-import { useEventBus } from '@vueuse/core'
-import { landmarksKey } from '../consts';
-const bus = useEventBus(landmarksKey)
+import { mapResults } from '../services/Mapper';
+import eventBus from '../services/EventBus';
+
 const hands: Ref<null | typeof Hands> = ref(null);
 const props = defineProps({
   draw: {
@@ -30,33 +28,9 @@ function stopCamera() {
   hands.value?.stopCamera();
 }
 
-function mapResults(result: HandLandmarksResult): SingleHandLandmarks[] {
-  const handLandmarks: SingleHandLandmarks[] = [];
-  if (result.multiHandLandmarks && result.multiHandedness) {
-    for (let i = 0; i < result.multiHandLandmarks.length; i++) {
-      const landmarks = result.multiHandLandmarks[i];
-      const handedness = result.multiHandedness[i];
-      if (handedness.score > 0.7) { 
-        const singleHand = {
-          handedness: handedness.label,
-          tensoredLandmarks: flatten(landmarks.map(landmark => [
-            landmark.x, 
-            landmark.y
-          ]))
-        }
-        handLandmarks.push(singleHand);
-        
-      } else {
-        console.warn('Handedness score is too low');
-      }
-    }
-  }
-  return handLandmarks;
-}
-
 function onLandmarks(result: HandLandmarksResult) {
   const landmarks = mapResults(result);
-  bus.emit({landmarks})
+  eventBus.emit({landmarks})
 }
 
 defineExpose({

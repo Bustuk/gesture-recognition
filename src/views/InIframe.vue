@@ -5,15 +5,13 @@
 <script setup lang="ts">
 import Gestures from '../components/Gestures.vue'
 import useGestureRecognition from '../composables/useGestureRecognition';
-import { landmarksKey } from '../consts';
-import { useEventBus } from '@vueuse/core'
+import eventBus from '../services/EventBus';
 import type { Ref } from 'vue'
 import { ref } from 'vue'
 
 const { predict } = useGestureRecognition();
-const bus = useEventBus(landmarksKey)
 
-bus.on(async ({landmarks})=> {
+eventBus.on(async ({landmarks})=> {
   for (const landmark of landmarks) {
     const result = await predict(landmark)
     window.parent.postMessage({

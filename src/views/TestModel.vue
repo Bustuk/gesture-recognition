@@ -16,16 +16,14 @@ import { NButton, NH5 } from 'naive-ui';
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 import useGestureRecognition from '../composables/useGestureRecognition';
-import { landmarksKey } from '../consts';
-import { useEventBus } from '@vueuse/core'
+import eventBus from '../services/EventBus';
 import type { PredictionResult } from '../types';
 import useTensorflow from '../composables/useTensorflow';
 const { downloadModel } = useTensorflow();
 
 const { predict } = useGestureRecognition();
 const prediction: Ref<PredictionResult> = ref({className: '', probability: 0})
-const bus = useEventBus(landmarksKey)
-bus.on(async ({landmarks})=> {
+eventBus.on(async ({landmarks})=> {
   for (const landmark of landmarks) {
     const result = await predict(landmark)
     prediction.value = result
