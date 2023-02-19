@@ -8,7 +8,7 @@ class GestureDB extends Dexie {
   constructor() {
     super('gestueDB');
     this.version(1).stores({
-      gestures: '++id, label, tensoredLandmarks, handedness' // Primary key and indexed props
+      gestures: '++id, label, tensoredLandmarks, handedness'
     });
   }
 }

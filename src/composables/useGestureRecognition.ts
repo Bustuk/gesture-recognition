@@ -8,9 +8,6 @@ export default function useGestureRecognition(modelPath: string = 'indexeddb://g
   const labelMap: Ref<Record<number, string>> = useStorage('gesture-recognition-model-labels',
   {"0":"victory","1":"pause","2":"spiderman","3":"l","4":"flat"})
   const predict = async (singleHand: SingleHandLandmarks): Promise<PredictionResult> => {
-    // w zależności od tego czy jest lewa czy prawa ręka
-    // użyjemy rónych modeli - narazie jest zbudowany tylko ten dla lewej ręki
-    // lub wymyślę jak je przemapować 
     let gestureName = '', max = 0;
     try {
       const tensor = tensor2d(singleHand.tensoredLandmarks, [1, 42])
@@ -19,7 +16,6 @@ export default function useGestureRecognition(modelPath: string = 'indexeddb://g
       max = Math.max(...arr[0])
       const index = arr[0].indexOf(max)
       gestureName = labelMap.value[index]
-      // console.log('PREDICTION', gestureName, max) //, arr[0])
     } catch(err) {
       console.error(err)
     }

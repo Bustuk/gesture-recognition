@@ -33,7 +33,7 @@ import { useMessage } from 'naive-ui'
 const tf = useTensorflow()
 const labelForDelete = ref('');
 const message = useMessage()
-const { getUniqueLabels, removeByLabel, getAll, } = useGestureDb();
+const { getUniqueLabels, removeByLabel, getAll } = useGestureDb();
 const askForDelete = (label: string) => {
   labelForDelete.value = label
   showModal.value = true;
@@ -63,6 +63,7 @@ const trainModel = async () => {
   const data = await getAll();
   await tf.loadData(data)
   await tf.prepareModel()
+  tf.showModelInfo()
   await tf.train()
   await tf.saveModel()
 }

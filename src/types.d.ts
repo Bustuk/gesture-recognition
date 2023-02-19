@@ -11,6 +11,6 @@ interface LabelledLandmark extends SingleHandLandmarks {
 }
 
 interface SingleHandLandmarks {
-  tensoredLandmarks: number[];
+  tensoredLandmarks: number[]; // 21 * 2 numbers for x,y coordinates
   handedness:  'Left' | 'Right'
 }
