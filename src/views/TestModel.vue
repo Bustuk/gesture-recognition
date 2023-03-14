@@ -1,6 +1,6 @@
 <template>
-  <div class="flex center flex-column">
-    <n-button @click="downloadModel">
+  <div class="flex center flex-column flex-grow">
+    <n-button v-if="false" @click="downloadModel">
       Download Model
     </n-button>
     <!-- <n-divider /> -->

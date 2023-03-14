@@ -12,7 +12,7 @@ const mediapipe_broken_files = [
 function mediapipe_workaround() {
   return {
     name: 'mediapipe_workaround',
-    load(id) {
+    load(id: string) {
       for (const file of mediapipe_broken_files) {
         if (path.basename(id) === file.path) {
           let code = fs.readFileSync(id, 'utf-8');
